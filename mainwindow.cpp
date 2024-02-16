@@ -16,7 +16,7 @@ MainWindow::MainWindow(QWidget *parent)
     menu = new QMenu(this);
     SysIcon = new QSystemTrayIcon(this);
     SysIcon->setIcon(icon);
-    SysIcon->setToolTip("Qt托盘");
+    SysIcon->setToolTip("倒计时");
     min = new QAction("窗口最小化",this);
     connect(min,&QAction::triggered,this,&MainWindow::hide);
 //    connect(min,SIGNAL(trigger()),this,&MainWindow::hide);
@@ -183,19 +183,3 @@ void MainWindow::closeDialog() {
     closeTime->deleteLater();  // 删除定时器对象
     closeTime = nullptr;  // 将指针置为空
 }
-
-//void MainWindow::showReminder() {
-//    // 使用HTML格式显示提醒内容
-//    QString reminderText = "<html><body><p style='font-size:14pt; color:#336699;'>望远时间到！</p></body></html>";
-//    QMessageBox msgBox;
-//    msgBox.setWindowTitle("Reminder");
-//    msgBox.setTextFormat(Qt::RichText);
-//    msgBox.setText(reminderText);
-//    msgBox.exec();
-//}
-
-
-//void MainWindow::showReminder() {
-//    // 弹出提醒窗口
-//    QMessageBox::information(this, "Reminder", "Time's up!");
-//}
