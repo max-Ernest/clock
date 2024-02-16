@@ -40,8 +40,8 @@ MainWindow::MainWindow(QWidget *parent)
 
 
     this->setWindowIcon(icon);
-    ui->min->setValue(0);
-    ui->sec->setValue(3);
+    ui->min->setValue(30);
+    ui->sec->setValue(0);
     ui->min->setRange(0, 59);
     ui->sec->setRange(0, 60);
 
@@ -102,18 +102,27 @@ void MainWindow::showReminder() {
 
     QString reminderText = "<html><body><p style='font-size:16pt; color:#336699;'>望远时间到！</p></body></html>";
 
-//    ReminderDialog dialog(reminderText, this);    导致闪退
     dialog = new ReminderDialog(reminderText, this);
 //    dialog.exec();      // 它会阻塞程序的执行，直到对话框关闭才会继续执行下面的代码。
     dialog->show();
 
     closeTime = new QTimer(this);
-    connect(closeTime, &QTimer::timeout, dialog, &QDialog::close);
+//    connect(closeTime, &QTimer::timeout, dialog, &QDialog::close);
+    connect(closeTime, &QTimer::timeout, [this]() {
+        closeTime->stop(); // 停止计时器
+        if (dialog) {
+            dialog->close(); // 关闭对话框
+            delete dialog; // 释放对话框对象的内存
+            dialog = nullptr; // 重置指针
+        }
+    });
+
     connect(closeTime, &QTimer::timeout, this, &MainWindow::startReminder);
 
     closeTime->start(5 * 1000);
 
-//    startReminder();
+    timer->stop();
+    oneSec->stop();
 }
 
 void MainWindow::stopTime() {
