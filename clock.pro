@@ -29,3 +29,5 @@ RESOURCES += \
     src.qrc
 
 DISTFILES +=
+
+RC_ICONS = src/clock.ico

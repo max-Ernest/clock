@@ -118,8 +118,10 @@ void MainWindow::showReminder() {
     });
 
     connect(closeTime, &QTimer::timeout, this, &MainWindow::startReminder);
+    connect(dialog, &QDialog::finished, this, &MainWindow::startReminder);
 
-    closeTime->start(5 * 1000);
+
+    closeTime->start(120 * 1000);
 
     timer->stop();
     oneSec->stop();
@@ -152,7 +154,7 @@ void MainWindow::closeEvent(QCloseEvent *event) {
     if(SysIcon->isVisible())
     {
         this->hide();
-        SysIcon->showMessage("倒计时小工具","倒计时将显示在此处");
+//        SysIcon->showMessage("倒计时小工具","倒计时将显示在此处");
         event->ignore();
     }
     else {
