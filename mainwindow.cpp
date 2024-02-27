@@ -104,6 +104,7 @@ void MainWindow::showReminder() {
 
     dialog = new ReminderDialog(reminderText, this);
 //    dialog.exec();      // 它会阻塞程序的执行，直到对话框关闭才会继续执行下面的代码。
+    dialog->setWindowFlags(dialog->windowFlags() | Qt::WindowStaysOnTopHint);
     dialog->show();
 
     closeTime = new QTimer(this);
