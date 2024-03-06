@@ -15,7 +15,6 @@ int main(int argc, char *argv[])
 
     MainWindow w;
     w.show();
-    qDebug() << "启动";
     return a.exec();
 }
 

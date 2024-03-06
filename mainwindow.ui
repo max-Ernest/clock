@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>630</width>
-    <height>340</height>
+    <width>668</width>
+    <height>342</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -186,7 +186,7 @@
      <rect>
       <x>380</x>
       <y>50</y>
-      <width>171</width>
+      <width>241</width>
       <height>131</height>
      </rect>
     </property>
@@ -204,7 +204,7 @@
       <rect>
        <x>0</x>
        <y>0</y>
-       <width>169</width>
+       <width>239</width>
        <height>129</height>
       </rect>
      </property>
@@ -213,9 +213,9 @@
    <widget class="QPushButton" name="addButton">
     <property name="geometry">
      <rect>
-      <x>390</x>
+      <x>380</x>
       <y>200</y>
-      <width>141</width>
+      <width>111</width>
       <height>41</height>
      </rect>
     </property>
@@ -229,13 +229,32 @@
      <string>添加待办</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="delButton">
+    <property name="geometry">
+     <rect>
+      <x>520</x>
+      <y>200</y>
+      <width>111</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>华文宋体</family>
+      <pointsize>10</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>删除待办</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>630</width>
+     <width>668</width>
      <height>26</height>
     </rect>
    </property>

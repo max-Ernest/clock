@@ -49,8 +49,15 @@ private slots:
 
 
     void addToDo();
-    void load();
+    void delToDo();
+    void load();        // 将 vector 中数据加载到界面
 
+    void openDB();
+    void start();       // 启动时，将数据库中内容加载到 vector
+    void exit();        // 退出时，将 vector 存放到数据库
+
+
+    void setFinish();
 private:
     Ui::MainWindow *ui;
     QTimer *timer;      // 定时器对象
@@ -62,5 +69,6 @@ private:
 
 
     QSqlDatabase DB;        // 数据库名称
+    QString queryString;    // 用于增删改查
 };
 #endif // MAINWINDOW_H

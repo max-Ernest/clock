@@ -11,6 +11,11 @@
 #include <QInputDialog>
 #include <QRandomGenerator>
 
+#include <QSqlDatabase>
+#include <QSqlQuery>
+#include <QSqlError>
+#include <QSqlRecord>
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -24,18 +29,16 @@ MainWindow::MainWindow(QWidget *parent)
     SysIcon->setToolTip("倒计时");
     min = new QAction("窗口最小化",this);
     connect(min,&QAction::triggered,this,&MainWindow::hide);
-//    connect(min,SIGNAL(trigger()),this,&MainWindow::hide);
-//    max = new QAction("窗口最大化",this);
-//    connect(max,&QAction::triggered,this,&MainWindow::showMaximized);
     restor = new QAction("恢复原来的样子",this);
     connect(restor,&QAction::triggered,this,&MainWindow::showNormal);
     quit = new QAction("退出",this);
-    // connect(quit,&QAction::triggered,this,&MainWindow::close);
-    connect(quit, &QAction::triggered, qApp, &QApplication::quit);
+    connect(quit, &QAction::triggered, this, [this]() {
+        exit();
+        QApplication::quit();
+    });
     connect(SysIcon,&QSystemTrayIcon::activated,this,&MainWindow::on_activatedSysTrayIcon);
 
     menu->addAction(min);
-//    menu->addAction(max);
     menu->addAction(restor);
     menu->addSeparator(); //分割
     menu->addAction(quit);
@@ -67,6 +70,9 @@ MainWindow::MainWindow(QWidget *parent)
 
 
     connect(ui->addButton, &QPushButton::clicked, this, &MainWindow::addToDo);
+    connect(ui->delButton, &QPushButton::clicked, this, &MainWindow::delToDo);
+    openDB();
+    start();
     playout = new QGridLayout();
     load();
 }
@@ -124,11 +130,11 @@ void MainWindow::showReminder() {
     closeTime = new QTimer(this);
 //    connect(closeTime, &QTimer::timeout, dialog, &QDialog::close);
     connect(closeTime, &QTimer::timeout, [this]() {
-        closeTime->stop(); // 停止计时器
+        closeTime->stop();                      // 停止计时器
         if (dialog) {
-            dialog->close(); // 关闭对话框
-            delete dialog; // 释放对话框对象的内存
-            dialog = nullptr; // 重置指针
+            dialog->close();                    // 关闭对话框
+            delete dialog;                      // 释放对话框对象的内存
+            dialog = nullptr;                   // 重置指针
         }
     });
 
@@ -169,7 +175,6 @@ void MainWindow::closeEvent(QCloseEvent *event) {
     if(SysIcon->isVisible())
     {
         this->hide();
-//        SysIcon->showMessage("倒计时小工具","倒计时将显示在此处");
         event->ignore();
     }
     else {
@@ -198,23 +203,42 @@ void MainWindow::addToDo()
 {
     bool bOk = false;
     QString name = QInputDialog::getMultiLineText(this,
-                                                               "待办名",
-                                                               "请输入待办名字",
-                                                               "",
-                                                               &bOk
-                                                               );
+                                                  "待办名",
+                                                  "请输入待办名字",
+                                                  "",
+                                                  &bOk
+                                                  );
     int p = QInputDialog::getInt(this,
-                                        "待办优先级",
-                                        "请输入优先级",
-                                        1,				//默认值
-                                        1,				//最小值
-                                        10,			//最大值
-                                        1,				//步进
-                                        &bOk);
+                                 "待办优先级",
+                                 "请输入优先级",
+                                 1,				//默认值
+                                 1,				//最小值
+                                 10,			//最大值
+                                 1,				//步进
+                                 &bOk);
 
     ToDo *temp = new ToDo(QRandomGenerator::global()->bounded(1000, 9999), name, p);
     ToDoList.append(temp);
     load();
+}
+
+void MainWindow::delToDo()
+{
+    qDebug() << "删除" << endl;
+    bool bOk = false;
+    QString name = QInputDialog::getMultiLineText(this,
+                                                  "待办名",
+                                                  "请输入待办名字",
+                                                  "",
+                                                  &bOk
+                                                  );
+    for (int i = 1; i < ToDoList.size(); i++) {
+        if (ToDoList[i]->getName() == name) {
+            ToDoList.erase(ToDoList.begin() + i);
+        }
+    }
+    load();
+
 }
 
 void MainWindow::load()
@@ -229,14 +253,13 @@ void MainWindow::load()
        return a->getPriority() < b->getPriority();
     });
 
-//    QMap<int, QCheckBox*> checkMap;
-
+    qDebug() << "-------------加载-----------------"  << endl;
     for (auto v : ToDoList) {
-//        qDebug() << v->getName() << "," << v->getFinish() << endl;
+        qDebug() << v->getName() << "," << v->getFinish() << endl;
         QCheckBox *cBox = new QCheckBox(v->getName());
         cBox->setMinimumSize(QSize(60, 30));
         connect(cBox, &QCheckBox::stateChanged, [=](int state) {
-             v->finished();
+             v->finished(state);
         });
         cBox->setChecked(v->getFinish());
         playout->addWidget((cBox));
@@ -244,9 +267,99 @@ void MainWindow::load()
     ui->scrollArea->widget()->setLayout(playout);
 }
 
+void MainWindow::openDB()
+{
+    //打开数据库
+    DB = QSqlDatabase::addDatabase("QSQLITE");
+    DB.setDatabaseName("./StudentDB.db");//打开数据库
+    if (DB.open())
+    {
+        qDebug() << "Database opened successfully！";
+        QSqlQuery createTableQuery;
+        createTableQuery.prepare("CREATE TABLE IF NOT EXISTS todo ("
+                                "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                                "name TEXT NOT NULL,"
+                                "priority INTEGER,"
+                                "finish BOOLEAN"
+                                ");");
+        if (!createTableQuery.exec())
+        {
+            qDebug() << "创建表失败：" << createTableQuery.lastError().text();
+        }
+        else
+        {
+            qDebug() << "表'todo'创建成功！";
+        }
+    }
+    else
+    {
+        qDebug() << "无法打开数据库：" << endl;
+    }
+}
+
+void MainWindow::start()
+{
+    queryString = "SELECT id, name, priority, finish FROM todo";
+    QSqlQuery query(queryString);
+    if (!query.exec()) {
+        qDebug()<<"Failed to execute query: "<< query.lastError().text();
+        return;
+    }
+    qDebug() << "-------------读取-----------------"  << endl;
+    while (query.next()) {
+        int i = query.value(0).toInt();
+        QString n = query.value(1).toString();
+        int p = query.value(2).toInt();
+        bool f = query.value(3).toBool();
+        qDebug() << n << "," << f << endl;
+        ToDoList.append(new ToDo(i, n, p, f));
+    }
+    QDate currentDate = QDate::currentDate();
+    QString dateString = currentDate.toString("yyyy-MM-dd");
+    qDebug() << dateString << endl;
+    if (ToDoList[0]->getName() != dateString) {
+        ToDoList[0]->setName(dateString);
+        setFinish();
+    }
+
+}
+
+void MainWindow::exit()
+{
+    QSqlQuery clearQuery("DELETE FROM todo");
+    if (!clearQuery.exec())
+    {
+        qDebug() << "清空 todo 表失败："<< clearQuery.lastError().text();
+    } else {
+        qDebug() << "todo 表已清空";
+    }
+
+    queryString = "INSERT INTO todo (id, name, priority, finish) VALUES (?, ?, ?, ?)";
+    QSqlQuery insertQuery;
+    qDebug() << "-------------退出-----------------"  << endl;
+    insertQuery.prepare(queryString);
+    for (auto v : ToDoList) {
+        qDebug() << v->getName() << "," << v->getFinish() << endl;
+        insertQuery.bindValue(0, v->getId());
+        insertQuery.bindValue(1, v->getName());
+        insertQuery.bindValue(2, v->getPriority());
+        insertQuery.bindValue(3, v->getFinish());
+        if (!insertQuery.exec()) {
+            qDebug() << "插入数据失败" << insertQuery.lastError().text();
+        }
+    }
+}
+
+void MainWindow::setFinish()
+{
+    for (auto v : ToDoList) {
+        v->unfinish();
+    }
+}
+
 
 void MainWindow::closeDialog() {
-    closeTime->stop();  // 停止定时器
-    closeTime->deleteLater();  // 删除定时器对象
-    closeTime = nullptr;  // 将指针置为空
+    closeTime->stop();                  // 停止定时器
+    closeTime->deleteLater();           // 删除定时器对象
+    closeTime = nullptr;                // 将指针置为空
 }
