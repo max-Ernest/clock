@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>668</width>
-    <height>342</height>
+    <width>680</width>
+    <height>334</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -186,8 +186,8 @@
      <rect>
       <x>380</x>
       <y>50</y>
-      <width>241</width>
-      <height>131</height>
+      <width>281</width>
+      <height>141</height>
      </rect>
     </property>
     <property name="font">
@@ -204,8 +204,8 @@
       <rect>
        <x>0</x>
        <y>0</y>
-       <width>239</width>
-       <height>129</height>
+       <width>279</width>
+       <height>139</height>
       </rect>
      </property>
     </widget>
@@ -232,7 +232,7 @@
    <widget class="QPushButton" name="delButton">
     <property name="geometry">
      <rect>
-      <x>520</x>
+      <x>530</x>
       <y>200</y>
       <width>111</width>
       <height>41</height>
@@ -254,7 +254,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>668</width>
+     <width>680</width>
      <height>26</height>
     </rect>
    </property>

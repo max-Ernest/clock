@@ -232,10 +232,15 @@ void MainWindow::delToDo()
                                                   "",
                                                   &bOk
                                                   );
-    for (int i = 1; i < ToDoList.size(); i++) {
+    int index = -1;
+    for (int i = 0; i < ToDoList.size(); i++) {
         if (ToDoList[i]->getName() == name) {
-            ToDoList.erase(ToDoList.begin() + i);
+            index = i;
+            break;
         }
+    }
+    if (index != -1) {
+        ToDoList.erase(ToDoList.begin() + index);
     }
     load();
 
@@ -317,11 +322,14 @@ void MainWindow::start()
     QDate currentDate = QDate::currentDate();
     QString dateString = currentDate.toString("yyyy-MM-dd");
     qDebug() << dateString << endl;
-    if (ToDoList[0]->getName() != dateString) {
-        ToDoList[0]->setName(dateString);
-        setFinish();
+    if (!ToDoList.empty()) {
+        if (ToDoList[0]->getName() != dateString) {
+            ToDoList[0]->setName(dateString);
+            setFinish();
+        }
+    } else {
+        ToDoList.append(new ToDo(1111, dateString, 0));
     }
-
 }
 
 void MainWindow::exit()
