@@ -1,10 +1,15 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "reminderdialog.h"
+#include "todo.h"
 #include <QTimer>
 #include <QDebug>
 #include <QMessageBox>
 #include <QIcon>
+#include <QVBoxLayout>
+#include <QCheckBox>
+#include <QInputDialog>
+#include <QRandomGenerator>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -59,7 +64,16 @@ MainWindow::MainWindow(QWidget *parent)
     connect(oneSec, &QTimer::timeout, this, &MainWindow::updateCountdown);
     startReminder();
 
+
+
+    connect(ui->addButton, &QPushButton::clicked, this, &MainWindow::addToDo);
+    playout = new QGridLayout();
+    load();
 }
+
+
+
+
 
 MainWindow::~MainWindow()
 {
@@ -178,6 +192,56 @@ void MainWindow::on_activatedSysTrayIcon(QSystemTrayIcon::ActivationReason reaso
         break;
 
     }
+}
+
+void MainWindow::addToDo()
+{
+    bool bOk = false;
+    QString name = QInputDialog::getMultiLineText(this,
+                                                               "待办名",
+                                                               "请输入待办名字",
+                                                               "",
+                                                               &bOk
+                                                               );
+    int p = QInputDialog::getInt(this,
+                                        "待办优先级",
+                                        "请输入优先级",
+                                        1,				//默认值
+                                        1,				//最小值
+                                        10,			//最大值
+                                        1,				//步进
+                                        &bOk);
+
+    ToDo *temp = new ToDo(QRandomGenerator::global()->bounded(1000, 9999), name, p);
+    ToDoList.append(temp);
+    load();
+}
+
+void MainWindow::load()
+{
+    while (playout->count()) {
+        QLayoutItem* item = playout->takeAt(0);
+        delete item->widget();
+        delete item;
+    }
+    // 自定义排序，按照待办优先级
+    qSort(ToDoList.begin(), ToDoList.end(), [](ToDo *a, ToDo *b) {
+       return a->getPriority() < b->getPriority();
+    });
+
+//    QMap<int, QCheckBox*> checkMap;
+
+    for (auto v : ToDoList) {
+//        qDebug() << v->getName() << "," << v->getFinish() << endl;
+        QCheckBox *cBox = new QCheckBox(v->getName());
+        cBox->setMinimumSize(QSize(60, 30));
+        connect(cBox, &QCheckBox::stateChanged, [=](int state) {
+             v->finished();
+        });
+        cBox->setChecked(v->getFinish());
+        playout->addWidget((cBox));
+    }
+    ui->scrollArea->widget()->setLayout(playout);
 }
 
 

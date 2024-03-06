@@ -5,7 +5,10 @@
 #include <QTime>
 #include <QCloseEvent>
 #include <QSystemTrayIcon> //托盘使用的头文件
+#include <QGridLayout>
+#include <QSqlDatabase>
 #include "reminderdialog.h"
+#include "todo.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -24,6 +27,10 @@ private:
     QAction *quit; //退出
     QMenu *menu;
 
+    QVector<ToDo*> ToDoList;
+
+    QGridLayout *playout;
+
 
 public:
     MainWindow(QWidget *parent = nullptr);
@@ -40,6 +47,10 @@ private slots:
     void closeEvent(QCloseEvent *event);
     void on_activatedSysTrayIcon(QSystemTrayIcon::ActivationReason reason);
 
+
+    void addToDo();
+    void load();
+
 private:
     Ui::MainWindow *ui;
     QTimer *timer;      // 定时器对象
@@ -48,5 +59,8 @@ private:
     int interval;       // 提醒间隔，单位：秒
     int countdownSeconds; // 保存总秒数
     ReminderDialog* dialog;
+
+
+    QSqlDatabase DB;        // 数据库名称
 };
 #endif // MAINWINDOW_H
