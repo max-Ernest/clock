@@ -36,6 +36,10 @@ MainWindow::MainWindow(QWidget *parent)
         exit();
         QApplication::quit();
     });
+    connect(QApplication::instance(), &QApplication::aboutToQuit, this, [this]() {
+        exit();
+        // 或者在这里执行你需要在退出前完成的清理工作
+    });
     connect(SysIcon,&QSystemTrayIcon::activated,this,&MainWindow::on_activatedSysTrayIcon);
 
     menu->addAction(min);
